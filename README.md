@@ -57,6 +57,11 @@ so its length partly encodes the outcome (informative censoring). A model meant 
 would have to drop them and would score lower; the documented pipeline already excludes visit
 ages and the last observed age.
 
+Out-of-fold, `champion_v8.py` reaches 0.777 on the hepatic endpoint and 0.959 on death, a
+weighted 0.832, well below its leaderboard score. The 0.9135 submission blends it (30%) with an
+earlier submission (70%), a weight picked on the public leaderboard: part of that score is
+leaderboard selection, and the private leaderboard is the fair test.
+
 Out-of-fold, the documented pipeline (`run_pipeline.py`, 5 seeds) reaches 0.948 on the hepatic
 endpoint and 0.897 on death, a weighted 0.933. That is above the leaderboard, for known reasons:
 features are selected on the full training set before cross-validation, and the stacking model is
