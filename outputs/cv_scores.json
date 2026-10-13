@@ -1,0 +1,13 @@
+{
+  "seed": 42,
+  "multi_seeds": [
+    42,
+    123,
+    456,
+    789,
+    2026
+  ],
+  "c_index_hepatic_oof": 0.9482855536818438,
+  "c_index_death_oof": 0.8968916907451187,
+  "estimated_weighted_score": 0.9328673948008261
+}
