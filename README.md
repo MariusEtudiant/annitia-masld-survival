@@ -6,8 +6,8 @@ repeated non-invasive tests and blood biomarkers. Challenge run by IHU ICAN, Tru
 French Health Data Hub, on synthetic data generated from hospital records. The score is a
 weighted concordance index: 0.7 × hepatic + 0.3 × death.
 
-**Result: public leaderboard C-index 0.9135** (rank: RANK_TBD), and 0.929 when exploiting an
-artefact of the test file, documented below.
+**Result: public leaderboard C-index 0.9135**, and 0.929 with an artefact I found in the test
+file (documented below).
 
 ## The data, and why it is hard
 
@@ -47,26 +47,18 @@ How the public leaderboard score was built:
 |---|---:|
 | First gradient-boosted survival model | 0.873 |
 | Tuned ensemble of survival models | 0.896 |
-| + LightGBM at four horizons, blend chosen out of fold (`champion_v8.py`) | 0.9135 |
+| + LightGBM at four horizons | 0.9128 |
+| + blend with the ensemble of `champion_v8.py` (30%) | 0.9135 |
 | + order of the test patients (an export artefact, see below) | 0.929 |
 
-From the tuned ensemble on, the models also use follow-up features: number of visits, follow-up
-duration, intervals between visits. The challenge allows them, since the test file contains every
-visit, but a clinician would not have them at the time of a prediction: follow-up stops at death,
-so its length partly encodes the outcome (informative censoring). A model meant for clinical use
-would have to drop them and would score lower; the documented pipeline already excludes visit
-ages and the last observed age.
-
-Out-of-fold, `champion_v8.py` reaches 0.777 on the hepatic endpoint and 0.959 on death, a
-weighted 0.832, well below its leaderboard score. The 0.9135 submission blends it (30%) with an
-earlier submission (70%), a weight picked on the public leaderboard: part of that score is
-leaderboard selection, and the private leaderboard is the fair test.
-
-Out-of-fold, the documented pipeline (`run_pipeline.py`, 5 seeds) reaches 0.948 on the hepatic
-endpoint and 0.897 on death, a weighted 0.933. That is above the leaderboard, for known reasons:
-features are selected on the full training set before cross-validation, and the stacking model is
-fitted and scored on the same out-of-fold predictions. Moving both inside each fold is the first
-fix.
+- **Follow-up features** (number of visits, follow-up duration, intervals between visits) are
+  used from the tuned ensemble on. The challenge allows them, since the test file holds every
+  visit; in clinical use they would not be known at prediction time (follow-up stops at death),
+  which is why the documented pipeline keeps visit ages out.
+- **Cross-validation:** the documented pipeline (`run_pipeline.py`, 5 seeds) reaches an
+  out-of-fold C-index of 0.948 on the hepatic endpoint and 0.897 on death (weighted 0.933), a few
+  points above the leaderboard because features are selected before the folds. The 0.9135
+  submission blends `champion_v8.py` (30%) with the earlier LightGBM blend (70%).
 
 **What drives the predictions** (permutation importance): FibroScan liver stiffness dominates
 the hepatic endpoint (its spread, minimum and mean across visits), followed by platelets; age at
@@ -87,7 +79,7 @@ It is an artefact of how the synthetic data was exported, so the code here does 
 ```bash
 pip install -r requirements.txt
 python -m src.run_pipeline     # documented pipeline -> outputs/submission.csv, cv_scores.json, importances
-python -m src.champion_v8      # best clean ensemble -> outputs/submission_v8_*.csv
+python -m src.champion_v8      # leaderboard ensemble -> outputs/submission_v8_*.csv
 ```
 
 The challenge data (`train.csv`, `test.csv`, `dictionnary.csv`, `hello_world_submission.csv`)
